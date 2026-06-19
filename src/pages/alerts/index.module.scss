@@ -1,0 +1,138 @@
+@use '@/styles/variables.scss' as *;
+
+.page {
+  min-height: 100vh;
+  background: linear-gradient(180deg, rgba(30, 136, 229, 0.08) 0%, $color-bg-page 300rpx);
+}
+
+.headerSection {
+  padding: $spacing-lg $page-padding $spacing-md;
+}
+
+.welcomeRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: $spacing-md;
+}
+
+.welcomeText {
+  flex: 1;
+}
+
+.welcomeTitle {
+  font-size: $font-size-xxl;
+  font-weight: $font-weight-bold;
+  color: $color-text-primary;
+  line-height: 1.3;
+}
+
+.welcomeSubtitle {
+  font-size: $font-size-sm;
+  color: $color-text-tertiary;
+  margin-top: $spacing-xs;
+}
+
+.settingsBtn {
+  display: flex;
+  align-items: center;
+  background-color: rgba(255, 255, 255, 0.9);
+  border-radius: $radius-round;
+  padding: $spacing-sm $spacing-md;
+  box-shadow: $shadow-card;
+  transition: all $transition-base;
+
+  &:active {
+    opacity: 0.9;
+    transform: scale(0.96);
+  }
+}
+
+.settingsBtnText {
+  font-size: $font-size-sm;
+  color: $color-primary;
+  font-weight: $font-weight-medium;
+}
+
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: $spacing-sm;
+  margin-bottom: $spacing-md;
+}
+
+.filterSection {
+  margin-bottom: $spacing-md;
+}
+
+.filterScroll {
+  white-space: nowrap;
+}
+
+.filterList {
+  display: inline-flex;
+  align-items: center;
+  padding: 0;
+}
+
+.filterChip {
+  display: inline-flex;
+  align-items: center;
+  padding: 12rpx 28rpx;
+  border-radius: $radius-button;
+  background-color: $color-bg-card;
+  margin-right: $spacing-sm;
+  box-shadow: $shadow-card;
+  transition: all $transition-base;
+  white-space: nowrap;
+  border: 2rpx solid transparent;
+
+  &:active {
+    transform: scale(0.96);
+  }
+}
+
+.filterChipActive {
+  background: linear-gradient(135deg, $color-primary 0%, $color-primary-light 100%);
+  box-shadow: $shadow-float;
+  border-color: transparent;
+}
+
+.filterChipText {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  font-weight: $font-weight-medium;
+}
+
+.filterChipTextActive {
+  color: $color-text-white;
+}
+
+.contentSection {
+  padding: 0 $page-padding $spacing-xl;
+}
+
+.sectionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: $spacing-md;
+}
+
+.sectionTitle {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+}
+
+.sectionCount {
+  font-size: $font-size-sm;
+  color: $color-text-tertiary;
+  background-color: rgba(30, 136, 229, 0.1);
+  padding: 4rpx 16rpx;
+  border-radius: $radius-round;
+}
+
+.emptyWrapper {
+  margin-top: $spacing-xl * 2;
+}

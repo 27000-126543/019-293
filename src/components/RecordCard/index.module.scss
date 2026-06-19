@@ -1,0 +1,122 @@
+@use '@/styles/variables.scss' as *;
+
+.card {
+  background-color: $color-bg-card;
+  border-radius: $radius-lg;
+  padding: $spacing-lg;
+  margin-bottom: $spacing-md;
+  box-shadow: $shadow-card;
+  transition: all $transition-base;
+
+  &:active {
+    opacity: 0.9;
+  }
+}
+
+.cardHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: $spacing-md;
+}
+
+.headerLeft {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  flex: 1;
+}
+
+.badgeSpacing {
+  width: $spacing-xs;
+}
+
+.time {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+  white-space: nowrap;
+}
+
+.alertLink {
+  display: flex;
+  align-items: center;
+  background-color: rgba(30, 136, 229, 0.06);
+  border-radius: $radius-md;
+  padding: $spacing-sm $spacing-md;
+  margin-bottom: $spacing-md;
+}
+
+.alertLinkLabel {
+  font-size: $font-size-sm;
+  color: $color-text-tertiary;
+}
+
+.alertLinkText {
+  font-size: $font-size-sm;
+  color: $color-primary;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  margin-right: $spacing-xs;
+}
+
+.alertLinkArrow {
+  font-size: $font-size-lg;
+  color: $color-primary;
+  line-height: 1;
+}
+
+.content {
+  font-size: $font-size-md;
+  color: $color-text-primary;
+  line-height: $line-height-normal;
+  margin-bottom: $spacing-md;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cardFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: $spacing-md;
+  border-top: 1rpx solid $color-divider;
+}
+
+.footerInfo {
+  display: flex;
+  align-items: center;
+}
+
+.counselor {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+}
+
+.dividerDot {
+  font-size: $font-size-sm;
+  color: $color-text-tertiary;
+  margin: 0 $spacing-xs;
+}
+
+.className {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+}
+
+.students {
+  max-width: 300rpx;
+}
+
+.studentsText {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  display: block;
+}

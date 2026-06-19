@@ -1,0 +1,344 @@
+@use '@/styles/variables.scss' as *;
+
+.page {
+  min-height: 100vh;
+  background-color: $color-bg-page;
+  padding-bottom: 160rpx;
+}
+
+.headerCard {
+  background: linear-gradient(135deg, $color-primary 0%, $color-primary-light 100%);
+  padding: $spacing-xl $page-padding;
+}
+
+.headerBadges {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-bottom: $spacing-md;
+}
+
+.headerBadge {
+  display: inline-flex;
+  align-items: center;
+  padding: 6rpx 20rpx;
+  border-radius: $radius-sm;
+  background-color: rgba(255, 255, 255, 0.2);
+  margin-right: $spacing-sm;
+  margin-bottom: $spacing-xs;
+}
+
+.headerBadgeText {
+  font-size: $font-size-sm;
+  color: $color-text-white;
+  font-weight: $font-weight-medium;
+}
+
+.headerTitle {
+  font-size: $font-size-xxl;
+  font-weight: $font-weight-bold;
+  color: $color-text-white;
+  line-height: $line-height-tight;
+  margin-bottom: $spacing-sm;
+}
+
+.headerMeta {
+  display: flex;
+  align-items: center;
+}
+
+.headerMetaText {
+  font-size: $font-size-sm;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.content {
+  padding: $spacing-md $page-padding;
+}
+
+.card {
+  background-color: $color-bg-card;
+  border-radius: $radius-lg;
+  padding: $spacing-lg;
+  margin-bottom: $spacing-md;
+  box-shadow: $shadow-card;
+}
+
+.cardTitle {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  margin-bottom: $spacing-md;
+}
+
+.contentText {
+  font-size: $font-size-md;
+  color: $color-text-secondary;
+  line-height: $line-height-loose;
+}
+
+.screenshotSection {
+  margin-top: $spacing-md;
+}
+
+.screenshotLabel {
+  font-size: $font-size-sm;
+  color: $color-text-tertiary;
+  margin-bottom: $spacing-sm;
+}
+
+.screenshotImage {
+  width: 100%;
+  height: 400rpx;
+  border-radius: $radius-md;
+  background-color: $color-bg-hover;
+  overflow: hidden;
+}
+
+.screenshotImg {
+  width: 100%;
+  height: 100%;
+}
+
+.sourceInfo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: $spacing-sm;
+}
+
+.sourceText {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+}
+
+.sectionRow {
+  margin-bottom: $spacing-md;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.rowLabel {
+  font-size: $font-size-sm;
+  color: $color-text-tertiary;
+  margin-bottom: $spacing-sm;
+}
+
+.keywordList {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.keywordItem {
+  display: inline-flex;
+  align-items: center;
+  background-color: rgba(30, 136, 229, 0.08);
+  border-radius: $radius-sm;
+  padding: 8rpx 20rpx;
+  margin-right: $spacing-sm;
+  margin-bottom: $spacing-sm;
+}
+
+.keywordText {
+  font-size: $font-size-sm;
+  color: $color-primary;
+  margin-right: 8rpx;
+}
+
+.keywordCount {
+  font-size: $font-size-xs;
+  color: $color-primary-dark;
+  font-weight: $font-weight-semibold;
+  background-color: rgba(30, 136, 229, 0.15);
+  padding: 2rpx 10rpx;
+  border-radius: $radius-xs;
+}
+
+.targetList {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.targetItem {
+  display: inline-flex;
+  align-items: center;
+  background-color: rgba(67, 160, 71, 0.08);
+  border-radius: $radius-sm;
+  padding: 8rpx 20rpx;
+  margin-right: $spacing-sm;
+  margin-bottom: $spacing-sm;
+}
+
+.targetText {
+  font-size: $font-size-sm;
+  color: $color-success;
+}
+
+.classList {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.classItem {
+  display: inline-flex;
+  align-items: center;
+  background-color: $color-bg-hover;
+  border-radius: $radius-sm;
+  padding: 8rpx 20rpx;
+  margin-right: $spacing-sm;
+  margin-bottom: $spacing-sm;
+}
+
+.classText {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+}
+
+.studentList {
+  display: flex;
+  flex-direction: column;
+}
+
+.studentItem {
+  display: flex;
+  align-items: center;
+  padding: $spacing-sm 0;
+  border-bottom: 1rpx solid $color-divider;
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.studentAvatar {
+  width: 64rpx;
+  height: 64rpx;
+  border-radius: $radius-round;
+  background-color: $color-primary;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: $spacing-sm;
+  flex-shrink: 0;
+}
+
+.studentAvatarText {
+  font-size: $font-size-md;
+  color: $color-text-white;
+  font-weight: $font-weight-semibold;
+}
+
+.studentInfo {
+  flex: 1;
+  overflow: hidden;
+}
+
+.studentName {
+  font-size: $font-size-md;
+  color: $color-text-primary;
+  font-weight: $font-weight-medium;
+  margin-bottom: 4rpx;
+}
+
+.studentDesc {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+}
+
+.recordsSection {
+  margin-top: $spacing-xs;
+}
+
+.recordHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: $spacing-md;
+}
+
+.recordTitle {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+}
+
+.recordCount {
+  font-size: $font-size-sm;
+  color: $color-text-tertiary;
+  background-color: $color-bg-hover;
+  padding: 4rpx 16rpx;
+  border-radius: $radius-round;
+}
+
+.footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  gap: $spacing-sm;
+  padding: $spacing-md $page-padding;
+  padding-bottom: calc($spacing-md + env(safe-area-inset-bottom));
+  background-color: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 -4rpx 16rpx rgba(0, 0, 0, 0.06);
+  backdrop-filter: blur(10px);
+}
+
+.btnSecondary {
+  flex: 1;
+  height: $button-height-lg;
+  background-color: $color-bg-hover;
+  border-radius: $radius-button;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all $transition-base;
+
+  &:active {
+    opacity: 0.9;
+    transform: scale(0.98);
+  }
+}
+
+.btnSecondaryText {
+  font-size: $font-size-md;
+  color: $color-text-secondary;
+  font-weight: $font-weight-medium;
+}
+
+.btnPrimary {
+  flex: 2;
+  height: $button-height-lg;
+  background: linear-gradient(135deg, $color-primary 0%, $color-primary-light 100%);
+  border-radius: $radius-button;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all $transition-base;
+
+  &:active {
+    opacity: 0.9;
+    transform: scale(0.98);
+  }
+}
+
+.btnPrimaryText {
+  font-size: $font-size-md;
+  color: $color-text-white;
+  font-weight: $font-weight-semibold;
+}
+
+.emptyRecords {
+  padding: $spacing-xl 0;
+  text-align: center;
+}
+
+.emptyRecordsText {
+  font-size: $font-size-sm;
+  color: $color-text-tertiary;
+}

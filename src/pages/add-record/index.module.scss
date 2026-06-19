@@ -1,0 +1,344 @@
+@use '@/styles/variables.scss' as *;
+
+.page {
+  min-height: 100vh;
+  background-color: $color-bg-page;
+  padding-bottom: 180rpx;
+}
+
+.header {
+  padding: $spacing-lg $page-padding $spacing-md;
+  background: linear-gradient(135deg, $color-primary 0%, $color-primary-light 100%);
+}
+
+.headerTitle {
+  font-size: $font-size-xl;
+  font-weight: $font-weight-semibold;
+  color: $color-text-white;
+  margin-bottom: $spacing-xs;
+}
+
+.headerSubtitle {
+  font-size: $font-size-sm;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.form {
+  padding: $spacing-md $page-padding;
+}
+
+.card {
+  background-color: $color-bg-card;
+  border-radius: $radius-lg;
+  padding: $spacing-lg;
+  margin-bottom: $spacing-md;
+  box-shadow: $shadow-card;
+}
+
+.cardTitle {
+  font-size: $font-size-md;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  margin-bottom: $spacing-md;
+}
+
+.relatedAlert {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: rgba(30, 136, 229, 0.06);
+  border-radius: $radius-md;
+  padding: $spacing-md;
+  margin-bottom: $spacing-md;
+  border-left: 6rpx solid $color-primary;
+}
+
+.relatedAlertInfo {
+  flex: 1;
+  overflow: hidden;
+}
+
+.relatedAlertLabel {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+  margin-bottom: 4rpx;
+}
+
+.relatedAlertTitle {
+  font-size: $font-size-sm;
+  color: $color-primary;
+  font-weight: $font-weight-medium;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.relatedAlertClear {
+  font-size: $font-size-sm;
+  color: $color-text-tertiary;
+  margin-left: $spacing-sm;
+  flex-shrink: 0;
+}
+
+.quickTypes {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: $spacing-sm;
+  margin-bottom: $spacing-md;
+}
+
+.quickType {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: $spacing-lg $spacing-md;
+  border-radius: $radius-md;
+  background-color: $color-bg-hover;
+  border: 2rpx solid transparent;
+  transition: all $transition-base;
+
+  &:active {
+    transform: scale(0.97);
+  }
+}
+
+.quickTypeActive {
+  background-color: rgba(30, 136, 229, 0.08);
+  border-color: $color-primary;
+}
+
+.quickTypeIcon {
+  font-size: 56rpx;
+  margin-bottom: $spacing-sm;
+}
+
+.quickTypeLabel {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  font-weight: $font-weight-medium;
+}
+
+.quickTypeLabelActive {
+  color: $color-primary;
+}
+
+.statusSection {
+  margin-top: $spacing-lg;
+}
+
+.statusOptions {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+}
+
+.statusOption {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: $spacing-md;
+  border-radius: $radius-md;
+  background-color: $color-bg-hover;
+  border: 2rpx solid transparent;
+  transition: all $transition-base;
+
+  &:active {
+    transform: scale(0.97);
+  }
+}
+
+.statusOptionActive {
+  border-color: $color-primary;
+  background-color: rgba(30, 136, 229, 0.08);
+}
+
+.statusOptionActiveComplete {
+  border-color: $color-success;
+  background-color: rgba(67, 160, 71, 0.08);
+}
+
+.statusOptionActivePending {
+  border-color: $color-warning;
+  background-color: rgba(251, 140, 0, 0.08);
+}
+
+.statusText {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  font-weight: $font-weight-medium;
+}
+
+.statusTextActive {
+  color: $color-primary;
+}
+
+.statusTextActiveComplete {
+  color: $color-success;
+}
+
+.statusTextActivePending {
+  color: $color-warning;
+}
+
+.inputRow {
+  margin-bottom: $spacing-md;
+}
+
+.inputLabel {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  margin-bottom: $spacing-sm;
+}
+
+.textArea {
+  width: 100%;
+  min-height: 200rpx;
+  background-color: $color-bg-hover;
+  border-radius: $radius-md;
+  padding: $spacing-md;
+  font-size: $font-size-md;
+  color: $color-text-primary;
+  box-sizing: border-box;
+  line-height: $line-height-normal;
+}
+
+.textCount {
+  text-align: right;
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+  margin-top: $spacing-xs;
+}
+
+.classSelect {
+  background-color: $color-bg-hover;
+  border-radius: $radius-md;
+  padding: $spacing-md;
+  transition: all $transition-base;
+
+  &:active {
+    background-color: rgba(30, 136, 229, 0.06);
+  }
+}
+
+.classSelectText {
+  font-size: $font-size-md;
+  color: $color-text-primary;
+}
+
+.classSelectPlaceholder {
+  color: $color-text-tertiary;
+}
+
+.studentsInput {
+  background-color: $color-bg-hover;
+  border-radius: $radius-md;
+  padding: $spacing-md;
+  min-height: 88rpx;
+}
+
+.studentsInputText {
+  font-size: $font-size-md;
+  color: $color-text-primary;
+  line-height: $line-height-normal;
+}
+
+.quickTemplates {
+  margin-top: $spacing-sm;
+}
+
+.quickTemplatesTitle {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+  margin-bottom: $spacing-sm;
+}
+
+.templateList {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: $spacing-sm;
+}
+
+.templateChip {
+  display: inline-flex;
+  align-items: center;
+  padding: 8rpx 20rpx;
+  background-color: rgba(30, 136, 229, 0.06);
+  border-radius: $radius-sm;
+  border: 1rpx solid rgba(30, 136, 229, 0.15);
+  transition: all $transition-base;
+
+  &:active {
+    transform: scale(0.96);
+    background-color: rgba(30, 136, 229, 0.12);
+  }
+}
+
+.templateChipText {
+  font-size: $font-size-xs;
+  color: $color-primary;
+}
+
+.footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  gap: $spacing-sm;
+  padding: $spacing-md $page-padding;
+  padding-bottom: calc($spacing-md + env(safe-area-inset-bottom));
+  background-color: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 -4rpx 16rpx rgba(0, 0, 0, 0.06);
+  backdrop-filter: blur(10px);
+}
+
+.btnCancel {
+  flex: 1;
+  height: $button-height-lg;
+  background-color: $color-bg-hover;
+  border-radius: $radius-button;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all $transition-base;
+
+  &:active {
+    opacity: 0.9;
+    transform: scale(0.98);
+  }
+}
+
+.btnCancelText {
+  font-size: $font-size-md;
+  color: $color-text-secondary;
+  font-weight: $font-weight-medium;
+}
+
+.btnSubmit {
+  flex: 2;
+  height: $button-height-lg;
+  background: linear-gradient(135deg, $color-primary 0%, $color-primary-light 100%);
+  border-radius: $radius-button;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all $transition-base;
+
+  &:active {
+    opacity: 0.9;
+    transform: scale(0.98);
+  }
+}
+
+.btnSubmitDisabled {
+  background: $color-text-disabled;
+}
+
+.btnSubmitText {
+  font-size: $font-size-md;
+  color: $color-text-white;
+  font-weight: $font-weight-semibold;
+}

@@ -1,0 +1,212 @@
+@use '@/styles/variables.scss' as *;
+
+.page {
+  min-height: 100vh;
+  background: linear-gradient(180deg, rgba(30, 136, 229, 0.08) 0%, $color-bg-page 300rpx);
+}
+
+.header {
+  padding: $spacing-lg $page-padding $spacing-md;
+}
+
+.headerTitle {
+  font-size: $font-size-xxl;
+  font-weight: $font-weight-bold;
+  color: $color-text-primary;
+  margin-bottom: $spacing-xs;
+}
+
+.headerSubtitle {
+  font-size: $font-size-sm;
+  color: $color-text-tertiary;
+  margin-bottom: $spacing-lg;
+}
+
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: $spacing-sm;
+  margin-bottom: $spacing-md;
+}
+
+.section {
+  margin-bottom: $spacing-lg;
+}
+
+.sectionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: $spacing-md;
+}
+
+.sectionTitle {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+}
+
+.sectionMore {
+  font-size: $font-size-sm;
+  color: $color-primary;
+}
+
+.content {
+  padding: 0 $page-padding $spacing-xl;
+}
+
+.classList {
+  display: flex;
+  flex-direction: column;
+}
+
+.classItem {
+  background-color: $color-bg-card;
+  border-radius: $radius-lg;
+  padding: $spacing-lg;
+  margin-bottom: $spacing-md;
+  box-shadow: $shadow-card;
+  transition: all $transition-base;
+
+  &:active {
+    opacity: 0.9;
+    transform: scale(0.99);
+  }
+}
+
+.classHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: $spacing-md;
+}
+
+.className {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+}
+
+.classCount {
+  font-size: $font-size-sm;
+  color: $color-text-tertiary;
+  background-color: rgba(30, 136, 229, 0.08);
+  padding: 4rpx 16rpx;
+  border-radius: $radius-round;
+}
+
+.classStats {
+  display: flex;
+  align-items: center;
+}
+
+.classStat {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.classStatValue {
+  font-size: $font-size-xl;
+  font-weight: $font-weight-bold;
+  line-height: 1.2;
+  margin-bottom: 4rpx;
+}
+
+.classStatLabel {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+}
+
+.classStatDivider {
+  width: 1rpx;
+  height: 56rpx;
+  background-color: $color-divider;
+  margin: 0 $spacing-md;
+}
+
+.riskHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: $spacing-md;
+}
+
+.riskTitle {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+}
+
+.riskCount {
+  display: flex;
+  align-items: center;
+}
+
+.riskBadge {
+  font-size: $font-size-xs;
+  padding: 4rpx 16rpx;
+  border-radius: $radius-round;
+  margin-left: $spacing-sm;
+}
+
+.riskBadgeHigh {
+  background-color: $color-tag-danger-bg;
+  color: $color-tag-danger-text;
+}
+
+.riskBadgeFocus {
+  background-color: $color-tag-warning-bg;
+  color: $color-tag-warning-text;
+}
+
+.emptyWrapper {
+  margin-top: $spacing-xl;
+}
+
+.trendSection {
+  margin-bottom: $spacing-lg;
+}
+
+.trendCard {
+  background-color: $color-bg-card;
+  border-radius: $radius-lg;
+  padding: $spacing-lg;
+  box-shadow: $shadow-card;
+}
+
+.trendTitle {
+  font-size: $font-size-md;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  margin-bottom: $spacing-md;
+}
+
+.trendBars {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  height: 160rpx;
+  padding-top: $spacing-md;
+}
+
+.trendBarWrap {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.trendBar {
+  width: 32rpx;
+  border-radius: $radius-xs $radius-xs 0 0;
+  background: linear-gradient(180deg, $color-primary-light 0%, $color-primary 100%);
+  margin-bottom: $spacing-xs;
+  min-height: 8rpx;
+}
+
+.trendLabel {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+}

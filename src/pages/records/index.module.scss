@@ -1,0 +1,174 @@
+@use '@/styles/variables.scss' as *;
+
+.page {
+  min-height: 100vh;
+  background: linear-gradient(180deg, rgba(30, 136, 229, 0.06) 0%, $color-bg-page 200rpx);
+}
+
+.header {
+  padding: $spacing-lg $page-padding $spacing-md;
+}
+
+.pageTitle {
+  font-size: $font-size-xxl;
+  font-weight: $font-weight-bold;
+  color: $color-text-primary;
+  margin-bottom: $spacing-xs;
+}
+
+.pageSubtitle {
+  font-size: $font-size-sm;
+  color: $color-text-tertiary;
+  margin-bottom: $spacing-lg;
+}
+
+.statsRow {
+  display: flex;
+  gap: $spacing-sm;
+  margin-bottom: $spacing-md;
+}
+
+.statBox {
+  flex: 1;
+  background-color: $color-bg-card;
+  border-radius: $radius-lg;
+  padding: $spacing-md;
+  box-shadow: $shadow-card;
+}
+
+.statBoxValue {
+  font-size: $font-size-xl;
+  font-weight: $font-weight-bold;
+  line-height: 1.2;
+  margin-bottom: 4rpx;
+}
+
+.statBoxLabel {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+}
+
+.filterBar {
+  margin-bottom: $spacing-md;
+}
+
+.filterScroll {
+  white-space: nowrap;
+}
+
+.filterList {
+  display: inline-flex;
+  align-items: center;
+}
+
+.filterChip {
+  display: inline-flex;
+  align-items: center;
+  padding: 10rpx 24rpx;
+  border-radius: $radius-button;
+  background-color: $color-bg-card;
+  margin-right: $spacing-sm;
+  box-shadow: $shadow-card;
+  transition: all $transition-base;
+  white-space: nowrap;
+
+  &:active {
+    transform: scale(0.96);
+  }
+}
+
+.filterChipActive {
+  background: linear-gradient(135deg, $color-primary 0%, $color-primary-light 100%);
+  box-shadow: $shadow-float;
+}
+
+.filterChipText {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  font-weight: $font-weight-medium;
+}
+
+.filterChipTextActive {
+  color: $color-text-white;
+}
+
+.content {
+  padding: 0 $page-padding $spacing-xl;
+}
+
+.sectionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: $spacing-md;
+}
+
+.sectionTitle {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+}
+
+.addBtn {
+  display: flex;
+  align-items: center;
+  background: linear-gradient(135deg, $color-primary 0%, $color-primary-light 100%);
+  padding: 12rpx 28rpx;
+  border-radius: $radius-button;
+  transition: all $transition-base;
+
+  &:active {
+    opacity: 0.9;
+    transform: scale(0.96);
+  }
+}
+
+.addBtnText {
+  font-size: $font-size-sm;
+  color: $color-text-white;
+  font-weight: $font-weight-medium;
+}
+
+.tabsWrapper {
+  margin-bottom: $spacing-md;
+}
+
+.tabScroll {
+  white-space: nowrap;
+}
+
+.tabList {
+  display: inline-flex;
+  align-items: center;
+}
+
+.tabItem {
+  display: inline-flex;
+  align-items: center;
+  padding: $spacing-sm $spacing-md;
+  margin-right: $spacing-sm;
+  border-radius: $radius-md;
+  background-color: transparent;
+  transition: all $transition-base;
+  border-bottom: 4rpx solid transparent;
+}
+
+.tabItemActive {
+  background-color: rgba(30, 136, 229, 0.08);
+  border-bottom-color: $color-primary;
+}
+
+.tabText {
+  font-size: $font-size-md;
+  color: $color-text-secondary;
+  font-weight: $font-weight-medium;
+}
+
+.tabTextActive {
+  color: $color-primary;
+  font-weight: $font-weight-semibold;
+}
+
+.emptyWrapper {
+  margin-top: $spacing-xl * 2;
+}
