@@ -1,27 +1,27 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import { View, Text } from '@tarojs/components';
-import Taro, { useRouter } from '@tarojs/taro';
+import Taro, { useRouter, useDidShow } from '@tarojs/taro';
 import styles from './index.module.scss';
 import StatusBadge from '@/components/StatusBadge';
-import { getStudentById } from '@/data/students';
-import { alertsData, getAlertById } from '@/data/alerts';
+import { useApp } from '@/store/AppContext';
 import { formatTime, formatRelativeTime } from '@/utils';
-import type { StudentInfo, AlertItem, CareRecord } from '@/types';
+import type { AlertItem, CareRecord } from '@/types';
 
 const StudentDetailPage: React.FC = () => {
   const router = useRouter();
+  const { getStudentById, getScopedAlerts, getAlertById } = useApp();
   const studentId = router.params?.id || '';
+  const [, forceTick] = useState(0);
 
-  const [student, setStudent] = useState<StudentInfo | undefined>(getStudentById(studentId));
+  useDidShow(() => {
+    forceTick(t => t + 1);
+  });
 
-  useEffect(() => {
-    const s = getStudentById(studentId);
-    setStudent(s);
-  }, [studentId]);
+  const student = useMemo(() => getStudentById(studentId), [getStudentById, studentId, forceTick]);
+  const allAlerts = useMemo(() => getScopedAlerts(), [getScopedAlerts, forceTick]);
 
   const relatedAlerts = useMemo((): AlertItem[] => {
     if (!student) return [];
-    const namePrefix = student.name.slice(0, 1);
     const matched: AlertItem[] = [];
     const careRelatedIds = new Set(
       student.careHistory
@@ -34,7 +34,8 @@ const StudentDetailPage: React.FC = () => {
         matched.push(alert);
       }
     });
-    alertsData.forEach(alert => {
+    const namePrefix = student.name.slice(0, 1);
+    allAlerts.forEach(alert => {
       const hasName = alert.relatedStudents.some(s => {
         const n = s.split('(')[0] || s;
         return n.startsWith(namePrefix) || n.includes(namePrefix);
@@ -44,8 +45,8 @@ const StudentDetailPage: React.FC = () => {
         matched.push(alert);
       }
     });
-    return matched.slice(0, 6);
-  }, [student]);
+    return matched.slice(0, 8);
+  }, [student, allAlerts, getAlertById]);
 
   const goToAlert = (alertId: string) => {
     Taro.navigateTo({
@@ -77,7 +78,7 @@ const StudentDetailPage: React.FC = () => {
     return (
       <View className={styles.page}>
         <View style={{ padding: '64rpx 32rpx', textAlign: 'center' }}>
-          <Text style={{ fontSize: '28rpx', color: '#909399' }}>未找到该学生信息</Text>
+          <Text style={{ fontSize: '28rpx', color: '#909399' }}>未找到该学生信息（可能已不在当前管理范围）</Text>
         </View>
       </View>
     );

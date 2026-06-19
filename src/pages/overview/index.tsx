@@ -1,61 +1,51 @@
 import React, { useState, useMemo } from 'react';
 import { View, Text, ScrollView } from '@tarojs/components';
-import Taro from '@tarojs/taro';
+import Taro, { useDidShow } from '@tarojs/taro';
 import styles from './index.module.scss';
 import classnames from 'classnames';
 import { useApp } from '@/store/AppContext';
 import StatCard from '@/components/StatCard';
 import StudentCard from '@/components/StudentCard';
 import EmptyState from '@/components/EmptyState';
-import { classStatsData, getFocusedStudents, getHighRiskStudents, getOverviewStats } from '@/data/students';
-import type { ClassStats } from '@/types';
 
 const OverviewPage: React.FC = () => {
-  const { counselor, alerts, records } = useApp();
+  const { counselor, getScopedOverviewStats, getScopedStudents } = useApp();
   const [refreshing, setRefreshing] = useState(false);
+  const [, forceTick] = useState(0);
 
-  const stats = useMemo(() => {
-    const overview = getOverviewStats();
-    const today = new Date().toDateString();
-    return {
-      totalAlerts: alerts.length,
-      pendingAlerts: alerts.filter(a => a.status === 'pending').length,
-      processingAlerts: alerts.filter(a => a.status === 'processing').length,
-      resolvedAlerts: alerts.filter(a => a.status === 'resolved').length,
-      weeklyRecords: records.filter(r => {
-        const weekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
-        return new Date(r.createdAt).getTime() > weekAgo;
-      }).length,
-      focusedStudents: getFocusedStudents().length,
-      highRiskStudents: getHighRiskStudents().length,
-      classCount: classStatsData.length
-    };
-  }, [alerts, records]);
+  useDidShow(() => {
+    forceTick(t => t + 1);
+  });
 
-  const focusedStudents = useMemo(() => getFocusedStudents(), []);
-  const highRiskStudents = useMemo(() => getHighRiskStudents(), []);
+  const stats = useMemo(() => getScopedOverviewStats(), [getScopedOverviewStats, counselor]);
+
+  const allScopedStudents = useMemo(() => getScopedStudents(), [getScopedStudents, counselor]);
+  const focusedStudents = useMemo(
+    () => allScopedStudents.filter(s => s.riskLevel !== 'normal'),
+    [allScopedStudents]
+  );
+  const highRiskStudents = useMemo(
+    () => allScopedStudents.filter(s => s.riskLevel === 'highrisk'),
+    [allScopedStudents]
+  );
 
   const trendData = useMemo(() => {
     const days = ['一', '二', '三', '四', '五', '六', '日'];
     return days.map((day, i) => ({
       label: `周${day}`,
-      value: 5 + Math.floor(Math.random() * 15) + i * 2
+      value: Math.max(1, Math.round(stats.pendingAlerts / 2 + Math.random() * 5 + i))
     }));
-  }, []);
+  }, [stats.pendingAlerts]);
 
   const maxTrendValue = Math.max(...trendData.map(d => d.value));
 
   const handleRefresh = () => {
     setRefreshing(true);
-    console.log('[OverviewPage] 刷新数据');
     setTimeout(() => {
       setRefreshing(false);
-      Taro.showToast({ title: '刷新成功', icon: 'success' });
-    }, 1000);
-  };
-
-  const goToStudentDetail = (id: string) => {
-    Taro.navigateTo({ url: `/pages/student-detail/index?id=${id}` });
+      Taro.showToast({ title: '已刷新', icon: 'success' });
+      forceTick(t => t + 1);
+    }, 800);
   };
 
   return (
@@ -69,7 +59,10 @@ const OverviewPage: React.FC = () => {
       <View className={styles.header}>
         <Text className={styles.headerTitle}>班级概览</Text>
         <Text className={styles.headerSubtitle}>
-          {counselor ? `负责 ${counselor.classNames.length} 个班级 · 共关注 ${focusedStudents.length} 名学生` : '了解您负责班级的整体情况'}
+          {counselor
+            ? `负责 ${counselor.classIds.length} 个班级 · 共关注 ${focusedStudents.length} 名学生`
+            : '请先在管理范围设置中选择负责的班级'
+          }
         </Text>
 
         <View className={styles.statsGrid}>
@@ -94,8 +87,8 @@ const OverviewPage: React.FC = () => {
           />
           <StatCard
             title="重点学生"
-            value={stats.focusedStudents}
-            subtitle={`含${stats.highRiskStudents}名重点关怀`}
+            value={focusedStudents.length}
+            subtitle={`含${highRiskStudents.length}名重点关怀`}
             color="danger"
           />
         </View>
@@ -122,48 +115,58 @@ const OverviewPage: React.FC = () => {
         <View className={styles.section}>
           <View className={styles.sectionHeader}>
             <Text className={styles.sectionTitle}>班级数据</Text>
-            <Text className={styles.sectionMore}>共 {stats.classCount} 个班级</Text>
+            <Text className={styles.sectionMore}>共 {stats.classStats.length} 个班级</Text>
           </View>
 
-          <View className={styles.classList}>
-            {classStatsData.slice(0, 5).map(cls => (
-              <View key={cls.classId} className={styles.classItem}>
-                <View className={styles.classHeader}>
-                  <Text className={styles.className}>{cls.className}</Text>
-                  <Text className={styles.classCount}>{cls.totalStudents}人</Text>
+          {stats.classStats.length > 0 ? (
+            <View className={styles.classList}>
+              {stats.classStats.map(cls => (
+                <View key={cls.classId} className={styles.classItem}>
+                  <View className={styles.classHeader}>
+                    <Text className={styles.className}>{cls.className}</Text>
+                    <Text className={styles.classCount}>{cls.totalStudents}人</Text>
+                  </View>
+                  <View className={styles.classStats}>
+                    <View className={styles.classStat}>
+                      <Text className={styles.classStatValue} style={{ color: '#FB8C00' }}>
+                        {cls.pendingAlerts}
+                      </Text>
+                      <Text className={styles.classStatLabel}>待处理</Text>
+                    </View>
+                    <View className={styles.classStatDivider} />
+                    <View className={styles.classStat}>
+                      <Text className={styles.classStatValue} style={{ color: '#43A047' }}>
+                        {cls.resolvedAlerts}
+                      </Text>
+                      <Text className={styles.classStatLabel}>已解决</Text>
+                    </View>
+                    <View className={styles.classStatDivider} />
+                    <View className={styles.classStat}>
+                      <Text className={styles.classStatValue} style={{ color: '#E53935' }}>
+                        {cls.focusedStudents}
+                      </Text>
+                      <Text className={styles.classStatLabel}>重点关注</Text>
+                    </View>
+                    <View className={styles.classStatDivider} />
+                    <View className={styles.classStat}>
+                      <Text className={styles.classStatValue} style={{ color: '#1E88E5' }}>
+                        {cls.weeklyRecords}
+                      </Text>
+                      <Text className={styles.classStatLabel}>本周记录</Text>
+                    </View>
+                  </View>
                 </View>
-                <View className={styles.classStats}>
-                  <View className={styles.classStat}>
-                    <Text className={styles.classStatValue} style={{ color: '#FB8C00' }}>
-                      {cls.pendingAlerts}
-                    </Text>
-                    <Text className={styles.classStatLabel}>待处理</Text>
-                  </View>
-                  <View className={styles.classStatDivider} />
-                  <View className={styles.classStat}>
-                    <Text className={styles.classStatValue} style={{ color: '#43A047' }}>
-                      {cls.resolvedAlerts}
-                    </Text>
-                    <Text className={styles.classStatLabel}>已解决</Text>
-                  </View>
-                  <View className={styles.classStatDivider} />
-                  <View className={styles.classStat}>
-                    <Text className={styles.classStatValue} style={{ color: '#E53935' }}>
-                      {cls.focusedStudents}
-                    </Text>
-                    <Text className={styles.classStatLabel}>重点关注</Text>
-                  </View>
-                  <View className={styles.classStatDivider} />
-                  <View className={styles.classStat}>
-                    <Text className={styles.classStatValue} style={{ color: '#1E88E5' }}>
-                      {cls.weeklyRecords}
-                    </Text>
-                    <Text className={styles.classStatLabel}>本周记录</Text>
-                  </View>
-                </View>
-              </View>
-            ))}
-          </View>
+              ))}
+            </View>
+          ) : (
+            <View className={styles.emptyWrapper}>
+              <EmptyState
+                icon="🏫"
+                title="暂无管理范围的班级数据"
+                description="前往「提醒列表」右上角「管理范围」设置负责的班级"
+              />
+            </View>
+          )}
         </View>
 
         <View className={styles.section}>
@@ -184,15 +187,18 @@ const OverviewPage: React.FC = () => {
           </Text>
 
           {focusedStudents.length > 0 ? (
-            focusedStudents.slice(0, 6).map(student => (
+            focusedStudents.map(student => (
               <StudentCard key={student.id} student={student} />
             ))
           ) : (
             <View className={styles.emptyWrapper}>
               <EmptyState
                 icon="👥"
-                title="暂无重点关注学生"
-                description="继续做好日常巡查，及时发现需要关怀的同学"
+                title={counselor?.classIds.length ? '当前范围暂无重点关注学生' : '请先设置管理范围'}
+                description={counselor?.classIds.length
+                  ? '继续做好日常巡查，及时发现需要关怀的同学'
+                  : '设置管理范围后，仅显示负责班级的重点学生'
+                }
               />
             </View>
           )}

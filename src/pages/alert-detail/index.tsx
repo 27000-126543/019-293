@@ -1,29 +1,32 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo } from 'react';
 import { View, Text, Image } from '@tarojs/components';
-import Taro, { useRouter } from '@tarojs/taro';
+import Taro, { useRouter, useDidShow } from '@tarojs/taro';
 import styles from './index.module.scss';
 import { useApp } from '@/store/AppContext';
 import RecordCard from '@/components/RecordCard';
 import StatusBadge from '@/components/StatusBadge';
-import { getAlertById } from '@/data/alerts';
-import { getRecordsByAlertId } from '@/data/records';
 import { formatTime } from '@/utils';
-import type { AlertItem, VerifyRecord, AlertStatus } from '@/types';
+import type { AlertItem, VerifyRecord } from '@/types';
 
 const AlertDetailPage: React.FC = () => {
   const router = useRouter();
   const alertId = router.params?.id || '';
-  const { records, updateAlertStatus } = useApp();
+  const { getAlertById, getRecordsByAlertId, updateAlertStatus } = useApp();
+  const [, forceTick] = useState(0);
 
-  const [alert, setAlert] = useState<AlertItem | undefined>(getAlertById(alertId));
-  const [alertRecords, setAlertRecords] = useState<VerifyRecord[]>([]);
+  useDidShow(() => {
+    forceTick(t => t + 1);
+  });
 
-  useEffect(() => {
-    const a = getAlertById(alertId);
-    setAlert(a);
-    const recs = records.filter(r => r.alertId === alertId);
-    setAlertRecords(recs.length > 0 ? recs : getRecordsByAlertId(alertId));
-  }, [alertId, records]);
+  const alert: AlertItem | undefined = useMemo(
+    () => getAlertById(alertId),
+    [getAlertById, alertId, forceTick]
+  );
+
+  const alertRecords: VerifyRecord[] = useMemo(
+    () => getRecordsByAlertId(alertId),
+    [getRecordsByAlertId, alertId, forceTick]
+  );
 
   const goToAddRecord = () => {
     Taro.navigateTo({
@@ -40,7 +43,7 @@ const AlertDetailPage: React.FC = () => {
       success: (res) => {
         if (res.confirm && alert) {
           updateAlertStatus(alert.id, 'resolved');
-          setAlert(prev => prev ? { ...prev, status: 'resolved', statusName: '已解决' } : prev);
+          forceTick(t => t + 1);
           Taro.showToast({ title: '已标记为已解决', icon: 'success' });
         }
       }
@@ -51,7 +54,7 @@ const AlertDetailPage: React.FC = () => {
     return (
       <View className={styles.page}>
         <View style={{ padding: '64rpx 32rpx', textAlign: 'center' }}>
-          <Text style={{ fontSize: '28rpx', color: '#909399' }}>未找到该提醒</Text>
+          <Text style={{ fontSize: '28rpx', color: '#909399' }}>未找到该提醒（可能已不在当前管理范围）</Text>
         </View>
       </View>
     );

@@ -8,7 +8,6 @@ import StatCard from '@/components/StatCard';
 import AlertCard from '@/components/AlertCard';
 import EmptyState from '@/components/EmptyState';
 import type { AlertCategory, AlertStatus, AlertItem } from '@/types';
-import { getCategoryLabel } from '@/utils';
 
 const categoryFilters: { key: AlertCategory | 'all'; label: string }[] = [
   { key: 'all', label: '全部' },
@@ -28,7 +27,7 @@ const statusFilters: { key: AlertStatus | 'all'; label: string }[] = [
 ];
 
 const AlertsPage: React.FC = () => {
-  const { counselor, isFirstLaunch, alerts, updateAlertStatus } = useApp();
+  const { counselor, isFirstLaunch, getScopedAlerts, getAlertScopeStats, updateAlertStatus } = useApp();
   const [categoryFilter, setCategoryFilter] = useState<AlertCategory | 'all'>('all');
   const [statusFilter, setStatusFilter] = useState<AlertStatus | 'all'>('all');
   const [refreshing, setRefreshing] = useState(false);
@@ -40,23 +39,16 @@ const AlertsPage: React.FC = () => {
     }
   });
 
-  const stats = useMemo(() => ({
-    today: alerts.filter(a => {
-      const today = new Date();
-      const alertDate = new Date(a.createdAt);
-      return alertDate.toDateString() === today.toDateString();
-    }).length,
-    pending: alerts.filter(a => a.status === 'pending').length,
-    urgent: alerts.filter(a => a.level === 'urgent' && a.status !== 'resolved').length
-  }), [alerts]);
+  const scopedAlerts = useMemo(() => getScopedAlerts(), [getScopedAlerts]);
+  const stats = useMemo(() => getAlertScopeStats(), [getAlertScopeStats]);
 
   const filteredAlerts = useMemo(() => {
-    return alerts.filter(alert => {
+    return scopedAlerts.filter(alert => {
       if (categoryFilter !== 'all' && alert.category !== categoryFilter) return false;
       if (statusFilter !== 'all' && alert.status !== statusFilter) return false;
       return true;
     });
-  }, [alerts, categoryFilter, statusFilter]);
+  }, [scopedAlerts, categoryFilter, statusFilter]);
 
   const sortedAlerts = useMemo(() => {
     const levelOrder = { urgent: 0, warning: 1, normal: 2 };
@@ -72,11 +64,10 @@ const AlertsPage: React.FC = () => {
 
   const handleRefresh = () => {
     setRefreshing(true);
-    console.log('[AlertsPage] 刷新数据');
     setTimeout(() => {
       setRefreshing(false);
-      Taro.showToast({ title: '刷新成功', icon: 'success' });
-    }, 1000);
+      Taro.showToast({ title: '已刷新', icon: 'success' });
+    }, 800);
   };
 
   const goToSettings = () => {
@@ -217,8 +208,8 @@ const AlertsPage: React.FC = () => {
           <View className={styles.emptyWrapper}>
             <EmptyState
               icon="🔍"
-              title="暂无匹配的线索"
-              description="换个筛选条件试试，或稍后刷新查看"
+              title={counselor?.classIds.length ? '当前管理范围暂无匹配的线索' : '请先设置管理范围'}
+              description={counselor?.classIds.length ? '换个筛选条件，或稍后刷新查看' : '点击右上角「管理范围」选择负责的班级'}
             />
           </View>
         )}

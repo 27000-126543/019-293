@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { View, Text, Textarea, Input } from '@tarojs/components';
 import Taro, { useRouter } from '@tarojs/taro';
 import styles from './index.module.scss';
@@ -58,16 +58,28 @@ const templates: Record<RecordType, string[]> = {
 
 const AddRecordPage: React.FC = () => {
   const router = useRouter();
-  const { addRecord, counselor } = useApp();
+  const { addRecord, addCareRecord, counselor } = useApp();
 
   const alertId = router.params?.alertId || '';
   const alertTitle = router.params?.alertTitle ? decodeURIComponent(router.params.alertTitle) : '';
+  const urlStudentId = router.params?.studentId || '';
+  const urlStudentName = router.params?.studentName ? decodeURIComponent(router.params.studentName) : '';
+  const urlClassId = router.params?.classId || '';
+  const urlClassName = router.params?.className ? decodeURIComponent(router.params.className) : '';
 
   const [selectedType, setSelectedType] = useState<RecordType | ''>('');
   const [selectedStatus, setSelectedStatus] = useState<RecordStatus>('completed');
   const [content, setContent] = useState('');
-  const [selectedClassId, setSelectedClassId] = useState('');
-  const [studentsText, setStudentsText] = useState('');
+  const [selectedClassId, setSelectedClassId] = useState(urlClassId);
+  const [studentsText, setStudentsText] = useState(urlStudentName);
+
+  useEffect(() => {
+    if (urlClassId) {
+      setSelectedClassId(urlClassId);
+    } else if (counselor && counselor.classIds.length > 0) {
+      setSelectedClassId(counselor.classIds[0]);
+    }
+  }, [urlClassId, counselor]);
 
   const availableClasses = useMemo(() => {
     if (counselor && counselor.classIds.length > 0) {
@@ -91,6 +103,7 @@ const AddRecordPage: React.FC = () => {
   };
 
   const getSelectedClassName = () => {
+    if (urlClassName && selectedClassId === urlClassId) return urlClassName;
     const cls = classes.find(c => c.id === selectedClassId);
     return cls?.name || '';
   };
@@ -114,6 +127,8 @@ const AddRecordPage: React.FC = () => {
     }
 
     const cls = classes.find(c => c.id === selectedClassId);
+    const className = cls?.name || availableClasses[0]?.name || '计算机2301班';
+    const finalClassId = selectedClassId || cls?.id || availableClasses[0]?.id || 'class_1';
     const typeName = getRecordTypeLabel(selectedType as RecordType);
     const statusNameMap: Record<RecordStatus, string> = {
       completed: '已完成',
@@ -126,7 +141,7 @@ const AddRecordPage: React.FC = () => {
       .map(s => s.trim())
       .filter(s => s.length > 0);
 
-    addRecord({
+    const newVerifyRecord = addRecord({
       alertId: alertId || undefined,
       alertTitle: alertTitle || undefined,
       type: selectedType as RecordType,
@@ -136,18 +151,37 @@ const AddRecordPage: React.FC = () => {
       content: content.trim(),
       counselorName: counselor?.name || '辅导员',
       relatedStudents,
-      relatedClassId: selectedClassId || (availableClasses[0]?.id || 'class_1'),
-      relatedClassName: cls?.name || availableClasses[0]?.name || '计算机2301班',
+      relatedClassId: finalClassId,
+      relatedClassName: className,
       attachments: []
     });
 
+    if (urlStudentId) {
+      addCareRecord(urlStudentId, {
+        type: selectedType as any,
+        typeName,
+        content: content.trim(),
+        relatedAlertId: alertId || undefined,
+        relatedAlertTitle: alertTitle || undefined
+      });
+      console.log('[AddRecord] 关怀记录同步写入学生档案', urlStudentId);
+    } else if (relatedStudents.length > 0) {
+      console.log('[AddRecord] 记录涉及学生（未匹配学生ID）', relatedStudents);
+    }
+
     console.log('[AddRecord] 记录已提交', {
+      id: newVerifyRecord.id,
       type: selectedType,
       status: selectedStatus,
-      content: content.trim()
+      alertId,
+      studentId: urlStudentId,
+      classId: finalClassId
     });
 
-    Taro.showToast({ title: '记录已保存', icon: 'success' });
+    Taro.showToast({
+      title: urlStudentId ? '已保存关怀记录' : '记录已保存',
+      icon: 'success'
+    });
 
     setTimeout(() => {
       Taro.navigateBack();
@@ -161,18 +195,39 @@ const AddRecordPage: React.FC = () => {
   return (
     <View className={styles.page}>
       <View className={styles.header}>
-        <Text className={styles.headerTitle}>添加核实记录</Text>
-        <Text className={styles.headerSubtitle}>记录每一次走访工作，便于追溯</Text>
+        <Text className={styles.headerTitle}>
+          {urlStudentId ? '新增关怀记录' : '添加核实记录'}
+        </Text>
+        <Text className={styles.headerSubtitle}>
+          {urlStudentId
+            ? `关联学生：${urlStudentName}${urlClassName ? `（${urlClassName}）` : ''}`
+            : '记录每一次走访工作，便于追溯'
+          }
+        </Text>
       </View>
 
       <View className={styles.form}>
-        {alertTitle && (
+        {(alertTitle || urlStudentId) && (
           <View className={styles.relatedAlert}>
             <View className={styles.relatedAlertInfo}>
-              <Text className={styles.relatedAlertLabel}>关联舆情</Text>
-              <Text className={styles.relatedAlertTitle}>{alertTitle}</Text>
+              {alertTitle && (
+                <>
+                  <Text className={styles.relatedAlertLabel}>关联舆情</Text>
+                  <Text className={styles.relatedAlertTitle}>{alertTitle}</Text>
+                </>
+              )}
+              {urlStudentId && (
+                <View style={{ marginTop: alertTitle ? '16rpx' : 0 }}>
+                  <Text className={styles.relatedAlertLabel}>
+                    {alertTitle ? '' : '关怀对象'}
+                  </Text>
+                  <Text className={styles.relatedAlertTitle}>
+                    {urlStudentName} {urlClassName ? `· ${urlClassName}` : ''}
+                  </Text>
+                </View>
+              )}
             </View>
-            <Text className={styles.relatedAlertClear} onClick={handleClearAlert}>取消关联</Text>
+            <Text className={styles.relatedAlertClear} onClick={handleClearAlert}>取消</Text>
           </View>
         )}
 
@@ -234,7 +289,7 @@ const AddRecordPage: React.FC = () => {
             <Text className={styles.inputLabel}>核实详情</Text>
             <Textarea
               className={styles.textArea}
-              placeholder="请描述核实的具体情况、处理过程和结果..."
+              placeholder={urlStudentId ? '请描述本次关怀的具体情况、谈话内容和后续安排...' : '请描述核实的具体情况、处理过程和结果...'}
               placeholderStyle="color: #C0C4CC"
               value={content}
               onInput={(e) => setContent(e.detail.value)}
@@ -293,7 +348,9 @@ const AddRecordPage: React.FC = () => {
           className={classnames(styles.btnSubmit, !canSubmit && styles.btnSubmitDisabled)}
           onClick={handleSubmit}
         >
-          <Text className={styles.btnSubmitText}>保存记录</Text>
+          <Text className={styles.btnSubmitText}>
+            {urlStudentId ? '保存关怀记录' : '保存记录'}
+          </Text>
         </View>
       </View>
     </View>

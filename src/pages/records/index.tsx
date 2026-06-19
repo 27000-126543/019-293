@@ -7,7 +7,6 @@ import { useApp } from '@/store/AppContext';
 import RecordCard from '@/components/RecordCard';
 import EmptyState from '@/components/EmptyState';
 import type { RecordType, RecordStatus } from '@/types';
-import { getRecordTypeLabel, getRecordStatusLabel } from '@/utils';
 
 const typeFilters: { key: RecordType | 'all'; label: string }[] = [
   { key: 'all', label: '全部类型' },
@@ -27,35 +26,28 @@ const statusTabs: { key: RecordStatus | 'all'; label: string }[] = [
 ];
 
 const RecordsPage: React.FC = () => {
-  const { records, addRecord } = useApp();
+  const { counselor, getScopedRecords, getRecordScopeStats, addRecord } = useApp();
   const [typeFilter, setTypeFilter] = useState<RecordType | 'all'>('all');
   const [statusTab, setStatusTab] = useState<RecordStatus | 'all'>('all');
   const [refreshing, setRefreshing] = useState(false);
 
-  const stats = useMemo(() => ({
-    total: records.length,
-    week: records.filter(r => {
-      const weekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
-      return new Date(r.createdAt).getTime() > weekAgo;
-    }).length,
-    completed: records.filter(r => r.status === 'completed').length
-  }), [records]);
+  const scopedRecords = useMemo(() => getScopedRecords(), [getScopedRecords]);
+  const stats = useMemo(() => getRecordScopeStats(), [getRecordScopeStats]);
 
   const filteredRecords = useMemo(() => {
-    return records.filter(r => {
+    return scopedRecords.filter(r => {
       if (typeFilter !== 'all' && r.type !== typeFilter) return false;
       if (statusTab !== 'all' && r.status !== statusTab) return false;
       return true;
     }).sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-  }, [records, typeFilter, statusTab]);
+  }, [scopedRecords, typeFilter, statusTab]);
 
   const handleRefresh = () => {
     setRefreshing(true);
-    console.log('[RecordsPage] 刷新数据');
     setTimeout(() => {
       setRefreshing(false);
-      Taro.showToast({ title: '刷新成功', icon: 'success' });
-    }, 1000);
+      Taro.showToast({ title: '已刷新', icon: 'success' });
+    }, 800);
   };
 
   const goToAddRecord = () => {
@@ -72,7 +64,12 @@ const RecordsPage: React.FC = () => {
     >
       <View className={styles.header}>
         <Text className={styles.pageTitle}>核实记录</Text>
-        <Text className={styles.pageSubtitle}>记录每一次走访，留下可追溯的痕迹</Text>
+        <Text className={styles.pageSubtitle}>
+          {counselor
+            ? `${counselor.collegeName} · 管理 ${counselor.classIds.length} 个班级，记录每一次走访`
+            : '记录每一次走访，留下可追溯的痕迹'
+          }
+        </Text>
 
         <View className={styles.statsRow}>
           <View className={styles.statBox}>
@@ -166,8 +163,11 @@ const RecordsPage: React.FC = () => {
           <View className={styles.emptyWrapper}>
             <EmptyState
               icon="📝"
-              title="暂无核实记录"
-              description="点击右上角「新增记录」开始记录您的工作"
+              title={counselor?.classIds.length ? '当前范围暂无核实记录' : '请先设置管理范围'}
+              description={counselor?.classIds.length
+                ? '点击右上角「新增记录」开始记录您的工作'
+                : '设置管理范围后，仅显示负责班级的记录'
+              }
             />
           </View>
         )}
