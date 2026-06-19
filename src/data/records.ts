@@ -64,11 +64,6 @@ const generateRecord = (
 
   const createdAt = new Date(Date.now() - Math.random() * 24 * 60 * 60 * 1000 * 7).toISOString();
   const updatedAt = new Date(Date.now() - Math.random() * 24 * 60 * 60 * 1000 * 1).toISOString();
-  const statusNameMap: Record<RecordStatus, string> = {
-    completed: '已完成',
-    in_progress: '进行中',
-    pending: '待跟进'
-  };
 
   const statusHistory: { status: RecordStatus; statusName: string; time: string; note?: string }[] = [];
   if (status === 'pending') {
@@ -139,18 +134,32 @@ export const getRecordsByStudent = (studentName: string): VerifyRecord[] => {
 };
 
 export const addRecord = (record: Omit<VerifyRecord, 'id' | 'createdAt' | 'updatedAt' | 'statusHistory'>): VerifyRecord => {
-  const now = new Date().toISOString();
+  const now = new Date();
+  const nowStr = now.toISOString();
   const statusNameMap: Record<RecordStatus, string> = {
     completed: '已完成',
     in_progress: '进行中',
     pending: '待跟进'
   };
+  const statusHistory: VerifyRecord['statusHistory'] = [];
+  if (record.status === 'pending') {
+    statusHistory.push({ status: 'pending', statusName: statusNameMap.pending, time: nowStr, note: '创建记录' });
+  } else if (record.status === 'in_progress') {
+    statusHistory.push({ status: 'pending', statusName: statusNameMap.pending, time: nowStr, note: '创建记录' });
+    statusHistory.push({ status: 'in_progress', statusName: statusNameMap.in_progress, time: nowStr, note: '开始核实处理' });
+  } else {
+    const oneHourAgo = new Date(now.getTime() - 60 * 60 * 1000).toISOString();
+    const halfHourAgo = new Date(now.getTime() - 30 * 60 * 1000).toISOString();
+    statusHistory.push({ status: 'pending', statusName: statusNameMap.pending, time: oneHourAgo, note: '创建记录' });
+    statusHistory.push({ status: 'in_progress', statusName: statusNameMap.in_progress, time: halfHourAgo, note: '开始核实处理' });
+    statusHistory.push({ status: 'completed', statusName: statusNameMap.completed, time: nowStr, note: '处理完成' });
+  }
   const newRecord: VerifyRecord = {
     ...record,
     id: `record_${Date.now()}`,
-    createdAt: now,
-    updatedAt: now,
-    statusHistory: [{ status: record.status, statusName: statusNameMap[record.status], time: now, note: '创建记录' }]
+    createdAt: record.status === 'completed' ? statusHistory[0].time : nowStr,
+    updatedAt: nowStr,
+    statusHistory
   };
   recordsData.unshift(newRecord);
   return newRecord;
