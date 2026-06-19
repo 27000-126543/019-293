@@ -459,3 +459,165 @@
   color: $color-text-white;
   font-weight: $font-weight-semibold;
 }
+
+.filterBar {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+  margin-bottom: $spacing-md;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  white-space: nowrap;
+  padding-bottom: 4rpx;
+}
+
+.filterChip {
+  display: inline-flex;
+  align-items: center;
+  padding: 8rpx 24rpx;
+  border-radius: $radius-round;
+  background-color: $color-bg-hover;
+  border: 2rpx solid transparent;
+  flex-shrink: 0;
+  transition: all $transition-base;
+
+  &:active {
+    opacity: 0.9;
+  }
+}
+
+.filterChipActive {
+  background-color: rgba(30, 136, 229, 0.1);
+  border-color: $color-primary;
+}
+
+.filterChipText {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  font-weight: $font-weight-medium;
+}
+
+.filterChipTextActive {
+  color: $color-primary;
+}
+
+.timeFilter {
+  display: flex;
+  align-items: center;
+  gap: $spacing-xs;
+  margin-bottom: $spacing-lg;
+}
+
+.timeChip {
+  display: inline-flex;
+  align-items: center;
+  padding: 6rpx 20rpx;
+  border-radius: $radius-round;
+  background-color: $color-bg-hover;
+  border: 1rpx solid transparent;
+  transition: all $transition-base;
+
+  &:active {
+    opacity: 0.9;
+  }
+}
+
+.timeChipActive {
+  background-color: rgba(251, 140, 0, 0.1);
+  border-color: $color-warning;
+}
+
+.timeChipText {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+}
+
+.timeChipTextActive {
+  color: $color-warning;
+  font-weight: $font-weight-medium;
+}
+
+.recordDot {
+  position: absolute;
+  left: -29rpx;
+  top: 8rpx;
+  width: 20rpx;
+  height: 20rpx;
+  border-radius: $radius-round;
+  background-color: $color-success;
+  border: 4rpx solid $color-bg-card;
+  box-shadow: 0 0 0 2rpx rgba(67, 160, 71, 0.3);
+  z-index: 1;
+}
+
+.alertDot {
+  position: absolute;
+  left: -29rpx;
+  top: 8rpx;
+  width: 20rpx;
+  height: 20rpx;
+  border-radius: $radius-round;
+  background-color: $color-warning;
+  border: 4rpx solid $color-bg-card;
+  box-shadow: 0 0 0 2rpx rgba(251, 140, 0, 0.3);
+  z-index: 1;
+}
+
+.timelineCard {
+  background-color: $color-bg-hover;
+  border-radius: $radius-md;
+  padding: $spacing-md;
+}
+
+.timelineCardClickable {
+  &:active {
+    background-color: rgba(30, 136, 229, 0.04);
+  }
+}
+
+.timelineHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: $spacing-sm;
+}
+
+.timelineType {
+  display: inline-flex;
+  align-items: center;
+  padding: 4rpx 14rpx;
+  border-radius: $radius-sm;
+}
+
+.timelineTypeText {
+  font-size: $font-size-xs;
+  font-weight: $font-weight-medium;
+}
+
+.timelineTime {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+}
+
+.timelineContent {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  line-height: $line-height-loose;
+  margin-bottom: $spacing-sm;
+}
+
+.timelineStatusRow {
+  display: flex;
+  align-items: center;
+  gap: $spacing-xs;
+}
+
+.emptyTimeline {
+  padding: $spacing-xl 0;
+  text-align: center;
+}
+
+.emptyTimelineText {
+  font-size: $font-size-sm;
+  color: $color-text-tertiary;
+}

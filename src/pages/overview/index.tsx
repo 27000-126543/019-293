@@ -121,7 +121,9 @@ const OverviewPage: React.FC = () => {
           {stats.classStats.length > 0 ? (
             <View className={styles.classList}>
               {stats.classStats.map(cls => (
-                <View key={cls.classId} className={styles.classItem}>
+                <View key={cls.classId} className={styles.classItem} onClick={() => {
+                  Taro.navigateTo({ url: `/pages/class-detail/index?classId=${cls.classId}&className=${encodeURIComponent(cls.className)}` });
+                }}>
                   <View className={styles.classHeader}>
                     <Text className={styles.className}>{cls.className}</Text>
                     <Text className={styles.classCount}>{cls.totalStudents}人</Text>

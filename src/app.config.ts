@@ -6,7 +6,9 @@ export default defineAppConfig({
     'pages/setup/index',
     'pages/alert-detail/index',
     'pages/add-record/index',
-    'pages/student-detail/index'
+    'pages/student-detail/index',
+    'pages/record-detail/index',
+    'pages/class-detail/index'
   ],
   window: {
     backgroundTextStyle: 'light',

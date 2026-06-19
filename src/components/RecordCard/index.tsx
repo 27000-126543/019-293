@@ -14,14 +14,16 @@ const RecordCard: React.FC<RecordCardProps> = ({ record }) => {
   const goToAlert = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (record.alertId) {
-      Taro.navigateTo({
-        url: `/pages/alert-detail/index?id=${record.alertId}`
-      });
+      Taro.navigateTo({ url: `/pages/alert-detail/index?id=${record.alertId}` });
     }
   };
 
+  const goToDetail = () => {
+    Taro.navigateTo({ url: `/pages/record-detail/index?id=${record.id}` });
+  };
+
   return (
-    <View className={styles.card}>
+    <View className={styles.card} onClick={goToDetail}>
       <View className={styles.cardHeader}>
         <View className={styles.headerLeft}>
           <StatusBadge type="recordType" value={record.type} />

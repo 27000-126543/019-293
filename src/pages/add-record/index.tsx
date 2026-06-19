@@ -1,12 +1,12 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { View, Text, Textarea, Input } from '@tarojs/components';
+import { View, Text, Textarea } from '@tarojs/components';
 import Taro, { useRouter } from '@tarojs/taro';
 import styles from './index.module.scss';
 import classnames from 'classnames';
 import { useApp } from '@/store/AppContext';
 import { classes } from '@/data/organizations';
-import { getRecordTypeLabel } from '@/utils';
-import type { RecordType, RecordStatus } from '@/types';
+import { getRecordTypeLabel, getCategoryLabel, formatRelativeTime } from '@/utils';
+import type { RecordType, RecordStatus, AlertItem } from '@/types';
 
 const quickTypes: { type: RecordType; label: string; icon: string }[] = [
   { type: 'contact_classrep', label: '联系班委', icon: '👥' },
@@ -24,44 +24,20 @@ const statusOptions: { status: RecordStatus; label: string }[] = [
 ];
 
 const templates: Record<RecordType, string[]> = {
-  contact_classrep: [
-    '已联系班长，了解班级整体情况',
-    '已召开班委短会，部署相关工作',
-    '学习委员反馈情况正常'
-  ],
-  visit_dorm: [
-    '晚查寝走访，学生状态良好',
-    '走访相关宿舍，调解矛盾',
-    '深入宿舍了解生活情况'
-  ],
-  report_office: [
-    '已反馈至学工办，等待处理',
-    '情况已上报，协调相关部门',
-    '已报备学院领导'
-  ],
-  talk_student: [
-    '一对一谈心谈话，情绪稳定',
-    '了解具体情况，给予心理疏导',
-    '已制定帮扶计划'
-  ],
-  notify_parent: [
-    '已电话告知家长相关情况',
-    '家校沟通良好，共同关注',
-    '家长表示配合工作'
-  ],
-  other: [
-    '组织主题班会进行教育',
-    '协调相关部门处理',
-    '持续跟进观察'
-  ]
+  contact_classrep: ['已联系班长，了解班级整体情况', '已召开班委短会，部署相关工作', '学习委员反馈情况正常'],
+  visit_dorm: ['晚查寝走访，学生状态良好', '走访相关宿舍，调解矛盾', '深入宿舍了解生活情况'],
+  report_office: ['已反馈至学工办，等待处理', '情况已上报，协调相关部门', '已报备学院领导'],
+  talk_student: ['一对一谈心谈话，情绪稳定', '了解具体情况，给予心理疏导', '已制定帮扶计划'],
+  notify_parent: ['已电话告知家长相关情况', '家校沟通良好，共同关注', '家长表示配合工作'],
+  other: ['组织主题班会进行教育', '协调相关部门处理', '持续跟进观察']
 };
 
 const AddRecordPage: React.FC = () => {
   const router = useRouter();
-  const { addRecord, addCareRecord, counselor } = useApp();
+  const { addRecord, addCareRecord, counselor, getScopedAlerts } = useApp();
 
-  const alertId = router.params?.alertId || '';
-  const alertTitle = router.params?.alertTitle ? decodeURIComponent(router.params.alertTitle) : '';
+  const urlAlertId = router.params?.alertId || '';
+  const urlAlertTitle = router.params?.alertTitle ? decodeURIComponent(router.params.alertTitle) : '';
   const urlStudentId = router.params?.studentId || '';
   const urlStudentName = router.params?.studentName ? decodeURIComponent(router.params.studentName) : '';
   const urlClassId = router.params?.classId || '';
@@ -72,6 +48,7 @@ const AddRecordPage: React.FC = () => {
   const [content, setContent] = useState('');
   const [selectedClassId, setSelectedClassId] = useState(urlClassId);
   const [studentsText, setStudentsText] = useState(urlStudentName);
+  const [selectedAlertId, setSelectedAlertId] = useState<string>(urlAlertId || '__none__');
 
   useEffect(() => {
     if (urlClassId) {
@@ -88,6 +65,22 @@ const AddRecordPage: React.FC = () => {
     return classes.slice(0, 6);
   }, [counselor]);
 
+  const studentRelatedAlerts = useMemo((): AlertItem[] => {
+    if (!urlStudentId) return [];
+    const allAlerts = getScopedAlerts();
+    if (urlClassId) {
+      return allAlerts.filter(a => a.relatedClassIds.includes(urlClassId)).slice(0, 8);
+    }
+    return allAlerts.slice(0, 8);
+  }, [getScopedAlerts, urlStudentId, urlClassId]);
+
+  const finalAlertId = selectedAlertId && selectedAlertId !== '__none__' ? selectedAlertId : '';
+  const finalAlertTitle = useMemo(() => {
+    if (!finalAlertId) return '';
+    const a = studentRelatedAlerts.find(a => a.id === finalAlertId);
+    return a?.title || '';
+  }, [finalAlertId, studentRelatedAlerts]);
+
   const canSubmit = selectedType && content.trim().length >= 5;
 
   const handleSelectClass = () => {
@@ -95,9 +88,7 @@ const AddRecordPage: React.FC = () => {
       itemList: availableClasses.map(c => c.name),
       success: (res) => {
         const selected = availableClasses[res.tapIndex];
-        if (selected) {
-          setSelectedClassId(selected.id);
-        }
+        if (selected) setSelectedClassId(selected.id);
       }
     });
   };
@@ -115,8 +106,7 @@ const AddRecordPage: React.FC = () => {
     });
   };
 
-  const handleClearAlert = (e: React.MouseEvent) => {
-    e.stopPropagation();
+  const handleCancel = () => {
     Taro.navigateBack();
   };
 
@@ -130,20 +120,13 @@ const AddRecordPage: React.FC = () => {
     const className = cls?.name || availableClasses[0]?.name || '计算机2301班';
     const finalClassId = selectedClassId || cls?.id || availableClasses[0]?.id || 'class_1';
     const typeName = getRecordTypeLabel(selectedType as RecordType);
-    const statusNameMap: Record<RecordStatus, string> = {
-      completed: '已完成',
-      in_progress: '进行中',
-      pending: '待跟进'
-    };
+    const statusNameMap: Record<RecordStatus, string> = { completed: '已完成', in_progress: '进行中', pending: '待跟进' };
 
-    const relatedStudents = studentsText
-      .split(/[,，、\s]+/)
-      .map(s => s.trim())
-      .filter(s => s.length > 0);
+    const relatedStudents = studentsText.split(/[,，、\s]+/).map(s => s.trim()).filter(s => s.length > 0);
 
-    const newVerifyRecord = addRecord({
-      alertId: alertId || undefined,
-      alertTitle: alertTitle || undefined,
+    addRecord({
+      alertId: finalAlertId || undefined,
+      alertTitle: finalAlertTitle || undefined,
       type: selectedType as RecordType,
       typeName,
       status: selectedStatus,
@@ -161,35 +144,17 @@ const AddRecordPage: React.FC = () => {
         type: selectedType as any,
         typeName,
         content: content.trim(),
-        relatedAlertId: alertId || undefined,
-        relatedAlertTitle: alertTitle || undefined
+        relatedAlertId: finalAlertId || undefined,
+        relatedAlertTitle: finalAlertTitle || undefined
       });
-      console.log('[AddRecord] 关怀记录同步写入学生档案', urlStudentId);
-    } else if (relatedStudents.length > 0) {
-      console.log('[AddRecord] 记录涉及学生（未匹配学生ID）', relatedStudents);
     }
-
-    console.log('[AddRecord] 记录已提交', {
-      id: newVerifyRecord.id,
-      type: selectedType,
-      status: selectedStatus,
-      alertId,
-      studentId: urlStudentId,
-      classId: finalClassId
-    });
 
     Taro.showToast({
       title: urlStudentId ? '已保存关怀记录' : '记录已保存',
       icon: 'success'
     });
 
-    setTimeout(() => {
-      Taro.navigateBack();
-    }, 800);
-  };
-
-  const handleCancel = () => {
-    Taro.navigateBack();
+    setTimeout(() => { Taro.navigateBack(); }, 800);
   };
 
   return (
@@ -207,27 +172,54 @@ const AddRecordPage: React.FC = () => {
       </View>
 
       <View className={styles.form}>
-        {(alertTitle || urlStudentId) && (
+        {(urlAlertTitle || urlStudentId) && (
           <View className={styles.relatedAlert}>
             <View className={styles.relatedAlertInfo}>
-              {alertTitle && (
+              {urlAlertTitle && (
                 <>
                   <Text className={styles.relatedAlertLabel}>关联舆情</Text>
-                  <Text className={styles.relatedAlertTitle}>{alertTitle}</Text>
+                  <Text className={styles.relatedAlertTitle}>{urlAlertTitle}</Text>
                 </>
               )}
-              {urlStudentId && (
-                <View style={{ marginTop: alertTitle ? '16rpx' : 0 }}>
-                  <Text className={styles.relatedAlertLabel}>
-                    {alertTitle ? '' : '关怀对象'}
-                  </Text>
+              {urlStudentId && !urlAlertTitle && (
+                <View>
+                  <Text className={styles.relatedAlertLabel}>关怀对象</Text>
                   <Text className={styles.relatedAlertTitle}>
                     {urlStudentName} {urlClassName ? `· ${urlClassName}` : ''}
                   </Text>
                 </View>
               )}
             </View>
-            <Text className={styles.relatedAlertClear} onClick={handleClearAlert}>取消</Text>
+          </View>
+        )}
+
+        {urlStudentId && studentRelatedAlerts.length > 0 && !urlAlertId && (
+          <View className={styles.card}>
+            <Text className={styles.cardTitle}>关联舆情线索（可选）</Text>
+            <View className={styles.alertPickerList}>
+              <View
+                className={classnames(styles.alertPickerNone, selectedAlertId === '__none__' && styles.alertPickerNoneActive)}
+                onClick={() => setSelectedAlertId('__none__')}
+              >
+                <View className={classnames(styles.alertPickerRadio, selectedAlertId === '__none__' && styles.alertPickerRadioActive)} />
+                <Text style={{ fontSize: '28rpx', color: '#909399' }}>不关联舆情线索</Text>
+              </View>
+              {studentRelatedAlerts.map(alert => (
+                <View
+                  key={alert.id}
+                  className={classnames(styles.alertPickerItem, selectedAlertId === alert.id && styles.alertPickerItemActive)}
+                  onClick={() => setSelectedAlertId(alert.id)}
+                >
+                  <View className={classnames(styles.alertPickerRadio, selectedAlertId === alert.id && styles.alertPickerRadioActive)} />
+                  <View className={styles.alertPickerContent}>
+                    <Text className={styles.alertPickerTitle}>{alert.title}</Text>
+                    <Text className={styles.alertPickerMeta}>
+                      {getCategoryLabel(alert.category)} · {alert.levelName} · {formatRelativeTime(alert.createdAt)}
+                    </Text>
+                  </View>
+                </View>
+              ))}
+            </View>
           </View>
         )}
 
@@ -237,23 +229,16 @@ const AddRecordPage: React.FC = () => {
             {quickTypes.map(item => (
               <View
                 key={item.type}
-                className={classnames(
-                  styles.quickType,
-                  selectedType === item.type && styles.quickTypeActive
-                )}
+                className={classnames(styles.quickType, selectedType === item.type && styles.quickTypeActive)}
                 onClick={() => setSelectedType(item.type)}
               >
                 <Text className={styles.quickTypeIcon}>{item.icon}</Text>
-                <Text className={classnames(
-                  styles.quickTypeLabel,
-                  selectedType === item.type && styles.quickTypeLabelActive
-                )}>
+                <Text className={classnames(styles.quickTypeLabel, selectedType === item.type && styles.quickTypeLabelActive)}>
                   {item.label}
                 </Text>
               </View>
             ))}
           </View>
-
           <View className={styles.statusSection}>
             <Text className={styles.inputLabel}>处理状态</Text>
             <View className={styles.statusOptions}>
@@ -284,7 +269,6 @@ const AddRecordPage: React.FC = () => {
 
         <View className={styles.card}>
           <Text className={styles.cardTitle}>记录内容</Text>
-
           <View className={styles.inputRow}>
             <Text className={styles.inputLabel}>核实详情</Text>
             <Textarea
@@ -297,7 +281,6 @@ const AddRecordPage: React.FC = () => {
             />
             <Text className={styles.textCount}>{content.length}/500</Text>
           </View>
-
           {selectedType && templates[selectedType] && (
             <View className={styles.quickTemplates}>
               <Text className={styles.quickTemplatesTitle}>快捷填写模板（点击插入）：</Text>
@@ -314,19 +297,14 @@ const AddRecordPage: React.FC = () => {
 
         <View className={styles.card}>
           <Text className={styles.cardTitle}>关联信息</Text>
-
           <View className={styles.inputRow}>
             <Text className={styles.inputLabel}>所属班级</Text>
             <View className={styles.classSelect} onClick={handleSelectClass}>
-              <Text className={classnames(
-                styles.classSelectText,
-                !selectedClassId && styles.classSelectPlaceholder
-              )}>
+              <Text className={classnames(styles.classSelectText, !selectedClassId && styles.classSelectPlaceholder)}>
                 {getSelectedClassName() || '点击选择班级'}
               </Text>
             </View>
           </View>
-
           <View className={styles.inputRow}>
             <Text className={styles.inputLabel}>涉及学生（多个用逗号分隔，选填）</Text>
             <Textarea
@@ -344,13 +322,8 @@ const AddRecordPage: React.FC = () => {
         <View className={styles.btnCancel} onClick={handleCancel}>
           <Text className={styles.btnCancelText}>取消</Text>
         </View>
-        <View
-          className={classnames(styles.btnSubmit, !canSubmit && styles.btnSubmitDisabled)}
-          onClick={handleSubmit}
-        >
-          <Text className={styles.btnSubmitText}>
-            {urlStudentId ? '保存关怀记录' : '保存记录'}
-          </Text>
+        <View className={classnames(styles.btnSubmit, !canSubmit && styles.btnSubmitDisabled)} onClick={handleSubmit}>
+          <Text className={styles.btnSubmitText}>{urlStudentId ? '保存关怀记录' : '保存记录'}</Text>
         </View>
       </View>
     </View>
