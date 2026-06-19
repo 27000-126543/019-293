@@ -7,16 +7,27 @@ import { useApp } from '@/store/AppContext';
 import { formatTime } from '@/utils';
 import type { VerifyRecord } from '@/types';
 
+const statusColorMap: Record<string, string> = {
+  completed: '#43A047',
+  in_progress: '#FB8C00',
+  pending: '#909399'
+};
+
+const statusDotClassMap: Record<string, string> = {
+  completed: 'statusDotSuccess',
+  in_progress: 'statusDotWarn',
+  pending: 'statusDotPrimary'
+};
+
 const RecordDetailPage: React.FC = () => {
   const router = useRouter();
   const recordId = router.params?.id || '';
-  const { getScopedRecords, getAlertById } = useApp();
+  const { getRecordById, getAlertById } = useApp();
   const [, forceTick] = useState(0);
 
   useDidShow(() => { forceTick(t => t + 1); });
 
-  const scopedRecords = useMemo(() => getScopedRecords(), [getScopedRecords, forceTick]);
-  const record = useMemo(() => scopedRecords.find(r => r.id === recordId), [scopedRecords, recordId, forceTick]);
+  const record = useMemo(() => getRecordById(recordId), [getRecordById, recordId, forceTick]);
   const relatedAlert = useMemo(() => record?.alertId ? getAlertById(record.alertId) : undefined, [record, getAlertById]);
 
   const goToAlert = (id: string) => { Taro.navigateTo({ url: `/pages/alert-detail/index?id=${id}` }); };
@@ -31,7 +42,10 @@ const RecordDetailPage: React.FC = () => {
     );
   }
 
-  const statusColor = record.status === 'completed' ? '#43A047' : record.status === 'in_progress' ? '#FB8C00' : '#909399';
+  const statusColor = statusColorMap[record.status] || '#909399';
+  const statusHistory = record.statusHistory?.length > 0
+    ? record.statusHistory
+    : [{ status: record.status, statusName: record.statusName, time: record.createdAt, note: '创建记录' }];
 
   return (
     <View className={styles.page}>
@@ -73,20 +87,31 @@ const RecordDetailPage: React.FC = () => {
         )}
 
         <View className={styles.card}>
-          <View className={styles.cardHeader}><Text className={styles.cardTitle}>状态记录</Text></View>
+          <View className={styles.cardHeader}>
+            <Text className={styles.cardTitle}>处理流转</Text>
+            <Text className={styles.cardCount}>{statusHistory.length} 个节点</Text>
+          </View>
           <View className={styles.statusList}>
-            <View className={styles.statusEntry}>
-              <View className={classnames(styles.statusDot, styles.statusDotPrimary)} />
-              <Text className={styles.statusText}>创建记录</Text>
-              <Text className={styles.statusTime}>{formatTime(record.createdAt)}</Text>
-            </View>
-            {record.updatedAt !== record.createdAt && (
-              <View className={styles.statusEntry}>
-                <View className={classnames(styles.statusDot, styles.statusDotSuccess)} />
-                <Text className={styles.statusText}>最近更新</Text>
-                <Text className={styles.statusTime}>{formatTime(record.updatedAt)}</Text>
-              </View>
-            )}
+            {statusHistory.map((entry, idx) => {
+              const color = statusColorMap[entry.status] || '#909399';
+              const dotClass = statusDotClassMap[entry.status] || 'statusDotPrimary';
+              const isLast = idx === statusHistory.length - 1;
+              return (
+                <View key={idx} className={classnames(styles.statusEntry, isLast && styles.statusEntryLast)}>
+                  <View className={styles.statusTimeline}>
+                    <View className={classnames(styles.statusDot, styles[dotClass])} />
+                    {!isLast && <View className={styles.statusLine} style={{ backgroundColor: `${color}40` }} />}
+                  </View>
+                  <View className={styles.statusEntryContent}>
+                    <View className={styles.statusEntryHeader}>
+                      <Text className={styles.statusEntryName} style={{ color }}>{entry.statusName}</Text>
+                      <Text className={styles.statusEntryTime}>{formatTime(entry.time)}</Text>
+                    </View>
+                    <Text className={styles.statusEntryNote}>{entry.note || '状态更新'}</Text>
+                  </View>
+                </View>
+              );
+            })}
           </View>
         </View>
 

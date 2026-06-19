@@ -64,6 +64,13 @@ export type RecordType = 'contact_classrep' | 'visit_dorm' | 'report_office' | '
 
 export type RecordStatus = 'completed' | 'in_progress' | 'pending';
 
+export interface StatusHistoryEntry {
+  status: RecordStatus;
+  statusName: string;
+  time: string;
+  note?: string;
+}
+
 export interface VerifyRecord {
   id: string;
   alertId?: string;
@@ -79,6 +86,7 @@ export interface VerifyRecord {
   relatedClassName: string;
   createdAt: string;
   updatedAt: string;
+  statusHistory: StatusHistoryEntry[];
   attachments?: string[];
 }
 

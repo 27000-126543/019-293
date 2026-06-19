@@ -62,6 +62,26 @@ const generateRecord = (
   const contents = typeContents[type];
   const content = contents[parseInt(id.split('_')[1]) % contents.length];
 
+  const createdAt = new Date(Date.now() - Math.random() * 24 * 60 * 60 * 1000 * 7).toISOString();
+  const updatedAt = new Date(Date.now() - Math.random() * 24 * 60 * 60 * 1000 * 1).toISOString();
+  const statusNameMap: Record<RecordStatus, string> = {
+    completed: '已完成',
+    in_progress: '进行中',
+    pending: '待跟进'
+  };
+
+  const statusHistory: { status: RecordStatus; statusName: string; time: string; note?: string }[] = [];
+  if (status === 'pending') {
+    statusHistory.push({ status: 'pending', statusName: statusNameMap.pending, time: createdAt, note: '创建记录' });
+  } else if (status === 'in_progress') {
+    statusHistory.push({ status: 'pending', statusName: statusNameMap.pending, time: createdAt, note: '创建记录' });
+    statusHistory.push({ status: 'in_progress', statusName: statusNameMap.in_progress, time: updatedAt, note: '开始核实' });
+  } else {
+    statusHistory.push({ status: 'pending', statusName: statusNameMap.pending, time: createdAt, note: '创建记录' });
+    statusHistory.push({ status: 'in_progress', statusName: statusNameMap.in_progress, time: new Date(new Date(createdAt).getTime() + 3600 * 1000).toISOString(), note: '开始核实' });
+    statusHistory.push({ status: 'completed', statusName: statusNameMap.completed, time: updatedAt, note: '处理完成' });
+  }
+
   return {
     id,
     alertId,
@@ -75,8 +95,9 @@ const generateRecord = (
     relatedStudents: students,
     relatedClassId: classId,
     relatedClassName: className,
-    createdAt: new Date(Date.now() - Math.random() * 24 * 60 * 60 * 1000 * 7).toISOString(),
-    updatedAt: new Date(Date.now() - Math.random() * 24 * 60 * 60 * 1000 * 1).toISOString(),
+    createdAt,
+    updatedAt,
+    statusHistory,
     attachments: []
   };
 };
@@ -117,12 +138,19 @@ export const getRecordsByStudent = (studentName: string): VerifyRecord[] => {
   return recordsData.filter(r => r.relatedStudents.includes(studentName));
 };
 
-export const addRecord = (record: Omit<VerifyRecord, 'id' | 'createdAt' | 'updatedAt'>): VerifyRecord => {
+export const addRecord = (record: Omit<VerifyRecord, 'id' | 'createdAt' | 'updatedAt' | 'statusHistory'>): VerifyRecord => {
+  const now = new Date().toISOString();
+  const statusNameMap: Record<RecordStatus, string> = {
+    completed: '已完成',
+    in_progress: '进行中',
+    pending: '待跟进'
+  };
   const newRecord: VerifyRecord = {
     ...record,
     id: `record_${Date.now()}`,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString()
+    createdAt: now,
+    updatedAt: now,
+    statusHistory: [{ status: record.status, statusName: statusNameMap[record.status], time: now, note: '创建记录' }]
   };
   recordsData.unshift(newRecord);
   return newRecord;

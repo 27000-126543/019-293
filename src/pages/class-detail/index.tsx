@@ -56,7 +56,7 @@ const ClassDetailPage: React.FC = () => {
             <Text className={styles.sectionTitle}>舆情线索</Text>
             <Text className={styles.sectionCount}>{classAlerts.length} 条</Text>
           </View>
-          {classAlerts.length > 0 ? classAlerts.slice(0, 6).map(alert => (
+          {classAlerts.length > 0 ? classAlerts.map(alert => (
             <View key={alert.id} className={styles.alertItem} onClick={() => goToAlert(alert.id)}>
               <View className={styles.alertBadgeCol}><StatusBadge type="category" value={alert.category} /></View>
               <View className={styles.alertInfo}>
@@ -79,7 +79,7 @@ const ClassDetailPage: React.FC = () => {
             <Text className={styles.sectionTitle}>走访记录</Text>
             <Text className={styles.sectionCount}>{classRecords.length} 条</Text>
           </View>
-          {classRecords.length > 0 ? classRecords.slice(0, 6).map(record => (
+          {classRecords.length > 0 ? classRecords.map(record => (
             <View key={record.id} className={styles.recordItem} onClick={() => goToRecord(record.id)}>
               <View className={styles.recordInfo}>
                 <View className={styles.recordType}><Text className={styles.recordTypeText}>{record.typeName}</Text></View>

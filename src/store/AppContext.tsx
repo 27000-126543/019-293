@@ -53,7 +53,7 @@ interface AppState {
   students: StudentInfo[];
   setCounselor: (info: CounselorInfo) => void;
   completeFirstLaunch: () => void;
-  addRecord: (record: Omit<VerifyRecord, 'id' | 'createdAt' | 'updatedAt'>) => VerifyRecord;
+  addRecord: (record: Omit<VerifyRecord, 'id' | 'createdAt' | 'updatedAt' | 'statusHistory'>) => VerifyRecord;
   updateAlertStatus: (alertId: string, status: AlertItem['status']) => void;
   addCareRecord: (studentId: string, careRecord: Omit<CareRecord, 'id' | 'createdAt'>) => void;
   getScopedAlerts: () => AlertItem[];
@@ -65,9 +65,26 @@ interface AppState {
   getScopedClassStats: () => ClassStats[];
   getStudentById: (id: string) => StudentInfo | undefined;
   getAlertById: (id: string) => AlertItem | undefined;
+  getRecordById: (id: string) => VerifyRecord | undefined;
   getRecordsByAlertId: (alertId: string) => VerifyRecord[];
   resetAllData: () => void;
 }
+
+const normalizeRecords = (list: VerifyRecord[]): VerifyRecord[] => {
+  const statusNameMap: Record<RecordStatus, string> = {
+    completed: '已完成',
+    in_progress: '进行中',
+    pending: '待跟进'
+  };
+  return list.map(r => {
+    if (r.statusHistory && r.statusHistory.length > 0) return r;
+    const hist = [{ status: r.status, statusName: statusNameMap[r.status], time: r.createdAt, note: '创建记录' }];
+    if (r.status !== 'pending' && r.updatedAt !== r.createdAt) {
+      hist.push({ status: r.status, statusName: statusNameMap[r.status], time: r.updatedAt, note: '状态更新' });
+    }
+    return { ...r, statusHistory: hist };
+  });
+};
 
 const AppContext = createContext<AppState | undefined>(undefined);
 
@@ -92,7 +109,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       console.error('[AppContext] 读取初始存储失败', e);
     }
     setAlerts(readStorage<AlertItem[]>(STORAGE_KEY_ALERTS, defaultAlerts));
-    setRecords(readStorage<VerifyRecord[]>(STORAGE_KEY_RECORDS, defaultRecords));
+    setRecords(normalizeRecords(readStorage<VerifyRecord[]>(STORAGE_KEY_RECORDS, defaultRecords)));
     setStudents(readStorage<StudentInfo[]>(STORAGE_KEY_STUDENTS, defaultStudents));
   }, []);
 
@@ -119,12 +136,19 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     }
   }, []);
 
-  const addRecord = useCallback((record: Omit<VerifyRecord, 'id' | 'createdAt' | 'updatedAt'>): VerifyRecord => {
+  const addRecord = useCallback((record: Omit<VerifyRecord, 'id' | 'createdAt' | 'updatedAt' | 'statusHistory'>): VerifyRecord => {
+    const now = new Date().toISOString();
+    const statusNameMap: Record<RecordStatus, string> = {
+      completed: '已完成',
+      in_progress: '进行中',
+      pending: '待跟进'
+    };
     const newRecord: VerifyRecord = {
       ...record,
       id: `record_${Date.now()}_${Math.floor(Math.random() * 1000)}`,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
+      createdAt: now,
+      updatedAt: now,
+      statusHistory: [{ status: record.status, statusName: statusNameMap[record.status], time: now, note: '创建记录' }]
     };
     setRecords(prev => {
       const next = [newRecord, ...prev];
@@ -169,12 +193,14 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
           createdAt: new Date().toISOString()
         };
         const updatedCareHistory = [newCare, ...s.careHistory];
-        const relatedAlertCount = updatedCareHistory.filter(c => c.relatedAlertId).length;
+        const uniqueAlertIds = new Set(
+          updatedCareHistory.filter(c => c.relatedAlertId).map(c => c.relatedAlertId as string)
+        );
         return {
           ...s,
           careHistory: updatedCareHistory,
           lastCareAt: newCare.createdAt,
-          recentAlertCount: Math.max(s.recentAlertCount, relatedAlertCount)
+          recentAlertCount: uniqueAlertIds.size
         };
       });
       writeStorage(STORAGE_KEY_STUDENTS, next);
@@ -207,6 +233,10 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   const getAlertById = useCallback((id: string): AlertItem | undefined => {
     return alerts.find(a => a.id === id);
   }, [alerts]);
+
+  const getRecordById = useCallback((id: string): VerifyRecord | undefined => {
+    return records.find(r => r.id === id);
+  }, [records]);
 
   const getRecordsByAlertId = useCallback((alertId: string): VerifyRecord[] => {
     return records.filter(r => r.alertId === alertId);
@@ -313,6 +343,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     getScopedClassStats,
     getStudentById,
     getAlertById,
+    getRecordById,
     getRecordsByAlertId,
     resetAllData
   }), [
@@ -320,7 +351,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     setCounselor, completeFirstLaunch, addRecord, updateAlertStatus, addCareRecord,
     getScopedAlerts, getScopedRecords, getScopedStudents,
     getAlertScopeStats, getRecordScopeStats, getScopedOverviewStats, getScopedClassStats,
-    getStudentById, getAlertById, getRecordsByAlertId, resetAllData
+    getStudentById, getAlertById, getRecordById, getRecordsByAlertId, resetAllData
   ]);
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

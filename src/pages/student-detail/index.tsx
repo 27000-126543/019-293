@@ -54,27 +54,23 @@ const StudentDetailPage: React.FC = () => {
 
   const relatedAlerts = useMemo((): AlertItem[] => {
     if (!student) return [];
-    const matched: AlertItem[] = [];
-    const careRelatedIds = new Set(student.careHistory.filter(c => c.relatedAlertId).map(c => c.relatedAlertId as string));
-    careRelatedIds.forEach(id => {
-      const alert = getAlertById(id);
-      if (alert && !matched.find(m => m.id === alert.id)) matched.push(alert);
-    });
-    const namePrefix = student.name.slice(0, 1);
-    scopedAlerts.forEach(alert => {
-      const hasName = alert.relatedStudents.some(s => { const n = s.split('(')[0] || s; return n.startsWith(namePrefix) || n.includes(namePrefix); });
-      const hasClass = alert.relatedClassIds.includes(student.classId);
-      if ((hasName || (hasClass && student.recentAlertCount > 0)) && !matched.find(m => m.id === alert.id)) matched.push(alert);
-    });
-    return matched.slice(0, 10);
-  }, [student, scopedAlerts, getAlertById]);
+    const careRelatedIds = Array.from(new Set(
+      student.careHistory.filter(c => c.relatedAlertId).map(c => c.relatedAlertId as string)
+    ));
+    return careRelatedIds
+      .map(id => getAlertById(id))
+      .filter((a): a is AlertItem => !!a);
+  }, [student, getAlertById]);
 
   const studentRecords = useMemo((): VerifyRecord[] => {
     if (!student) return [];
-    const namePrefix = student.name.slice(0, 1);
     return scopedRecords.filter(r =>
-      r.relatedClassId === student.classId ||
-      r.relatedStudents.some(s => s.includes(namePrefix) || student.name.includes(s.split('(')[0] || ''))
+      r.relatedStudents.some(s => {
+        const n = (s.split('(')[0] || s).trim();
+        return n === student.name ||
+          n.startsWith(student.name.slice(0, Math.min(2, student.name.length))) ||
+          student.name.startsWith(n.slice(0, Math.min(2, n.length)));
+      })
     );
   }, [student, scopedRecords]);
 
@@ -213,7 +209,7 @@ const StudentDetailPage: React.FC = () => {
             <Text className={styles.statLabel}>关怀记录</Text>
           </View>
           <View className={styles.statItem}>
-            <Text className={styles.statNumber}>{student.careHistory.filter(c => c.relatedAlertId).length}</Text>
+            <Text className={styles.statNumber}>{relatedAlerts.length}</Text>
             <Text className={styles.statLabel}>线索串联</Text>
           </View>
         </View>
